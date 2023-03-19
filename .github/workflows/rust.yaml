@@ -22,7 +22,7 @@ jobs:
           default: true
           components: rustfmt
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt -- --check
+      - run: cargo fmt --all -- --check
 
   clippy:
     name: Clippy
@@ -36,7 +36,7 @@ jobs:
           default: true
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo clippy --all-features --all-targets --workspace -- -D warnings
 
   build:
     name: Build
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --all-features --verbose
+      - run: cargo build --all-features --all-targets --workspace --verbose
 
   run_tests:
     name: Run tests
@@ -52,4 +52,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features --all-targets --verbose
+      - run: cargo test --all-features --all-targets --workspace --verbose
