@@ -1,0 +1,8 @@
+[package]
+name = "gluesql-logic-test"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+macros = { package = "test-macros", path = "../test-macros" }
