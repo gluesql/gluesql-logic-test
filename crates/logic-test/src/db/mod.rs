@@ -131,4 +131,12 @@ pub(crate) fn execute_test(db: &mut impl Execute) {
         rows: [["2", "b"], ["3", "c"]],
         types: ["INTEGER", "TEXT"]
     );
+
+    exec!("CREATE TABLE Bar(num FLOAT)", 0);
+    exec!("INSERT INTO Bar VALUES(6.5)", 1);
+
+    query!("SELECT * FROM Bar",
+        rows: [["6.5"]],
+        types: ["FLOAT"]
+    );
 }
