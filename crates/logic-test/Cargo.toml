@@ -6,3 +6,7 @@ authors.workspace = true
 
 [dependencies]
 macros = { package = "test-macros", path = "../test-macros" }
+rusqlite = { version = "0.28", features = ["column_decltype"] }
+sqllogictest = "0.13"
+thiserror = "1"
+tracing = "0.1"
