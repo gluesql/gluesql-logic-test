@@ -1,6 +1,9 @@
 use std::ops::ControlFlow;
 
-use gluesql::prelude::{Glue, MemoryStorage, Payload};
+use gluesql::{
+    core::ast_builder::{table, Build},
+    prelude::{Glue, MemoryStorage, Payload},
+};
 use sqlparser::{
     ast::{ObjectName, Visit, Visitor},
     dialect::GenericDialect,
@@ -33,11 +36,10 @@ impl GlueSQL {
     }
 
     pub fn table_types(&mut self, table_name: &str) -> Result<Vec<Type>, LogicTestError> {
-        let mut payloads = self
+        let payload = self
             .storage
-            .execute(format!("SHOW COLUMNS FROM {table_name}"))
+            .execute_stmt(&table(table_name).show_columns().build().unwrap())
             .into_gluesql_error()?;
-        let payload = payloads.remove(0);
 
         let Payload::ShowColumns(show_columns) = payload else {
 			unreachable!("SHOW COLUMNS should return Payload::ShowColumns")
