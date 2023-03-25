@@ -69,7 +69,6 @@ impl Execute for GlueSQL {
         Ok(match payload {
             // select
             Payload::Select { rows, .. } => {
-                println!("get select");
                 let table_name = get_table_name(sql.as_ref());
                 let types = self.table_types(&table_name)?;
 
@@ -89,21 +88,15 @@ impl Execute for GlueSQL {
                     types,
                     rows: rows
                         .into_iter()
-                        .map(|row| Row(row.into_iter().map(|(_, value)| value.into()).collect()))
+                        .map(|row| Row(row.into_values().map(Into::into).collect()))
                         .collect(),
                 }
             }
             // execute
-            Payload::Insert(count) => {
-                Output::StatementComplete(count.try_into().expect("failed to convert usize to u64"))
-            }
-            Payload::Delete(count) => {
-                Output::StatementComplete(count.try_into().expect("failed to convert usize to u64"))
-            }
-            Payload::Update(count) => {
-                Output::StatementComplete(count.try_into().expect("failed to convert usize to u64"))
-            }
-            Payload::Create
+            Payload::Insert(_)
+            | Payload::Delete(_)
+            | Payload::Update(_)
+            | Payload::Create
             | Payload::DropTable
             | Payload::AlterTable
             | Payload::CreateIndex

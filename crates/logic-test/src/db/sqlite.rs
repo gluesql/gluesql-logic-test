@@ -59,13 +59,8 @@ impl Execute for Sqlite {
         match query {
             Query::Query => parse_query(stmt),
             Query::Execute => {
-                let stmt_complete_count = stmt.execute([]).into_sqlite_result()?;
-
-                Ok(Output::StatementComplete(
-                    stmt_complete_count
-                        .try_into()
-                        .expect("failed to convert usize to u64"),
-                ))
+                stmt.execute([]).into_sqlite_result()?;
+                Ok(Output::StatementComplete(0))
             }
         }
     }
