@@ -16,7 +16,7 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn from_sql_str(value: &str) -> Option<Self> {
+    pub fn from_sql_type(value: &str) -> Option<Self> {
         Some(match value.to_uppercase().as_str() {
             "TEXT" => Self::Text,
             "INTEGER" => Self::Integer,
@@ -102,7 +102,7 @@ pub(crate) fn execute_test(db: &impl Execute) {
                         .collect(),
                     types: $types
                         .into_iter()
-                        .map(Type::from_sql_str)
+                        .map(Type::from_sql_type)
                         .flatten()
                         .collect()
                 }
