@@ -1,5 +1,6 @@
 use crate::error::LogicTestError;
 
+pub mod gluesql;
 pub mod sqlite;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -71,10 +72,10 @@ impl Output {
 }
 
 pub trait Execute {
-    fn execute_inner(&self, sql: impl AsRef<str>) -> Result<Output, LogicTestError>;
+    fn execute_inner(&mut self, sql: impl AsRef<str>) -> Result<Output, LogicTestError>;
 
     fn execute(
-        &self,
+        &mut self,
         sql: impl AsRef<str>,
     ) -> Result<sqllogictest::DBOutput<Type>, LogicTestError> {
         self.execute_inner(sql).map(Output::into)
@@ -82,11 +83,11 @@ pub trait Execute {
 }
 
 #[cfg(test)]
-pub(crate) fn execute_test(db: &impl Execute) {
+pub(crate) fn execute_test(db: &mut impl Execute) {
     macro_rules! exec {
-        ($sql:literal, $count:literal) => {
+        ($sql:literal) => {
             let output = db.execute_inner($sql).unwrap();
-            assert_eq!(output, Output::StatementComplete($count));
+            assert_eq!(output, Output::StatementComplete(0));
         };
     }
 
@@ -110,24 +111,34 @@ pub(crate) fn execute_test(db: &impl Execute) {
         };
     }
 
-    exec!("CREATE TABLE Foo (a INTEGER, b TEXT)", 0);
-    exec!("INSERT INTO Foo VALUES (1, 'a')", 1);
-    exec!("INSERT INTO Foo VALUES (2, 'b'), (3, 'c')", 2);
+    exec!("CREATE TABLE Foo (a INTEGER, b TEXT)");
+    exec!("INSERT INTO Foo VALUES (1, 'a')");
+    exec!("INSERT INTO Foo VALUES (2, 'b'), (3, 'c')");
 
     query!("SELECT * FROM Foo",
         rows: [["1", "a"], ["2", "b"], ["3", "c"]],
         types: ["INTEGER", "TEXT"]
     );
 
-    exec!("UPDATE Foo SET a = 10 WHERE a = 1", 1);
+    exec!("UPDATE Foo SET a = 10 WHERE a = 1");
     query!("SELECT * FROM Foo",
         rows: [["10", "a"], ["2", "b"], ["3", "c"]],
         types: ["INTEGER", "TEXT"]
     );
 
-    exec!("DELETE FROM Foo WHERE a = 10", 1);
+    exec!("DELETE FROM Foo WHERE a = 10");
     query!("SELECT * FROM Foo",
         rows: [["2", "b"], ["3", "c"]],
         types: ["INTEGER", "TEXT"]
     );
+    exec!("DROP TABLE Foo");
+
+    exec!("CREATE TABLE Bar(num FLOAT)");
+    exec!("INSERT INTO Bar VALUES(6.5)");
+
+    query!("SELECT * FROM Bar",
+        rows: [["6.5"]],
+        types: ["FLOAT"]
+    );
+    exec!("DROP TABLE Bar");
 }

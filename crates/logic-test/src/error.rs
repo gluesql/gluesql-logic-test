@@ -4,4 +4,7 @@ use crate::db;
 pub enum LogicTestError {
     #[error("sqlite error: {0}")]
     Sqlite(#[from] db::sqlite::Error),
+
+    #[error("gluesql error: {0}")]
+    GlueSQL(#[from] db::gluesql::Error),
 }
