@@ -77,7 +77,7 @@ fn parse_query(mut stmt: Statement) -> Result<Output, LogicTestError> {
         .into_iter()
         .map(|column| {
             let decl_type = column.decl_type();
-            let decl_type = decl_type.map(Type::from_sql_str).flatten();
+            let decl_type = decl_type.and_then(Type::from_sql_str);
 
             match decl_type {
                 Some(decl_type) => decl_type,
