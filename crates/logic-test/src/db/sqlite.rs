@@ -30,10 +30,11 @@ impl FromStr for Query {
     type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(s.to_uppercase()
-            .starts_with("SELECT")
-            .then_some(Query::Query)
-            .unwrap_or(Query::Execute))
+        Ok(if s.to_uppercase().starts_with("SELECT") {
+            Query::Query
+        } else {
+            Query::Execute
+        })
     }
 }
 
