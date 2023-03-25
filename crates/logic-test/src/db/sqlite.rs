@@ -11,8 +11,8 @@ pub struct Sqlite {
 }
 
 pub enum Query {
-    /// Selct
-    Query,
+    /// SELECT
+    Select,
     /// Other
     Execute,
 }
@@ -31,7 +31,7 @@ impl FromStr for Query {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(if s.to_uppercase().starts_with("SELECT") {
-            Query::Query
+            Query::Select
         } else {
             Query::Execute
         })
@@ -58,7 +58,7 @@ impl Execute for Sqlite {
 
         let mut stmt = self.connection.prepare(sql.as_ref()).into_sqlite_result()?;
         match query {
-            Query::Query => parse_query(stmt),
+            Query::Select => parse_query(stmt),
             Query::Execute => {
                 stmt.execute([]).into_sqlite_result()?;
                 Ok(Output::StatementComplete(0))
