@@ -30,10 +30,10 @@ impl FromStr for Query {
     type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s.to_uppercase().as_str() {
-            "SELECT" => Self::Query,
-            _ => Self::Execute,
-        })
+        Ok(s.to_uppercase()
+            .starts_with("SELECT")
+            .then_some(Query::Query)
+            .unwrap_or(Query::Execute))
     }
 }
 
@@ -46,7 +46,7 @@ impl Sqlite {
 }
 
 impl Execute for Sqlite {
-    fn execute_inner(&self, sql: impl AsRef<str>) -> Result<Output, LogicTestError> {
+    fn execute_inner(&mut self, sql: impl AsRef<str>) -> Result<Output, LogicTestError> {
         let query: Query = sql
             .as_ref()
             .split_whitespace()
@@ -137,7 +137,7 @@ mod tests {
 
     #[test]
     fn execute() {
-        let db = Sqlite::new_memory();
-        execute_test(&db);
+        let mut db = Sqlite::new_memory();
+        execute_test(&mut db);
     }
 }

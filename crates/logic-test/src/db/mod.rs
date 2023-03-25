@@ -1,5 +1,6 @@
 use crate::error::LogicTestError;
 
+pub mod gluesql;
 pub mod sqlite;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -71,10 +72,10 @@ impl Output {
 }
 
 pub trait Execute {
-    fn execute_inner(&self, sql: impl AsRef<str>) -> Result<Output, LogicTestError>;
+    fn execute_inner(&mut self, sql: impl AsRef<str>) -> Result<Output, LogicTestError>;
 
     fn execute(
-        &self,
+        &mut self,
         sql: impl AsRef<str>,
     ) -> Result<sqllogictest::DBOutput<Type>, LogicTestError> {
         self.execute_inner(sql).map(Output::into)
@@ -82,7 +83,7 @@ pub trait Execute {
 }
 
 #[cfg(test)]
-pub(crate) fn execute_test(db: &impl Execute) {
+pub(crate) fn execute_test(db: &mut impl Execute) {
     macro_rules! exec {
         ($sql:literal, $count:literal) => {
             let output = db.execute_inner($sql).unwrap();

@@ -5,8 +5,12 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+gluesql = { version = "0.13", git = "https://github.com/gluesql/gluesql.git", rev = "91d57c4f0c87a638fc3aacba50caadeabc9e0302" }
+# depend on gluesql-core
+chrono = "=0.4.23"
 macros = { package = "test-macros", path = "../test-macros" }
 rusqlite = { version = "0.28", features = ["column_decltype"] }
 sqllogictest = "0.13"
 thiserror = "1"
 tracing = "0.1"
+sqlparser = { version = "0.32", features = ["visitor"] }
