@@ -48,7 +48,7 @@ fn expand(callee: &Ident, attr: Config) -> Vec<ItemFn> {
             callee,
             path_for_name
                 .to_string_lossy()
-                .strip_suffix(&format!(".{}", extension))
+                .strip_suffix(&format!(".{extension}"))
                 .expect("failed to strip suffix extension")
                 .replace(['\\', '/'], "__")
         )

@@ -26,7 +26,7 @@ SELECT * FROM test
         )
         .await;
 
-    assert!(result.is_ok(), "Basic operations should work: {:?}", result);
+    assert!(result.is_ok(), "Basic operations should work: {result:?}");
 }
 
 #[tokio::test]
@@ -40,7 +40,7 @@ async fn test_simple_file() {
         match result {
             Ok(_) => println!("✓ select1.test passed"),
             Err(e) => {
-                println!("select1.test failed with: {}", e);
+                println!("select1.test failed with: {e}");
                 // Don't fail the test, just report the issue
             }
         }
@@ -58,7 +58,7 @@ async fn test_custom_file() {
         match result {
             Ok(_) => println!("✓ test.slt passed"),
             Err(e) => {
-                println!("test.slt failed with: {}", e);
+                println!("test.slt failed with: {e}");
                 // Don't fail the test, just report the issue
             }
         }

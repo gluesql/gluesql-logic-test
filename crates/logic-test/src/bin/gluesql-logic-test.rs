@@ -51,7 +51,7 @@ async fn run_file_async<D: sqllogictest::AsyncDB, M: sqllogictest::MakeConnectio
     // Escape trailing comments
     let script = TRAILING_COMMENTS_ESCAPE_REGEX
         .replace_all(
-            &std::fs::read_to_string(&path).expect("Must exist"),
+            &std::fs::read_to_string(path).expect("Must exist"),
             "$1 $2\n",
         )
         .to_string();

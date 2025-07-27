@@ -31,8 +31,8 @@ impl sqllogictest::DB for GlueSQL {
 
         let handle = thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
+            let mut storage = storage_clone.lock().unwrap();
             rt.block_on(async {
-                let mut storage = storage_clone.lock().unwrap();
                 let payloads = storage.execute(&sql).await.map_err(Error::GlueSQL)?;
 
                 assert_eq!(payloads.len(), 1, "only one payload is supported");
@@ -129,8 +129,8 @@ impl Execute for GlueSQL {
 
         let handle = thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
+            let mut storage = storage_clone.lock().unwrap();
             rt.block_on(async {
-                let mut storage = storage_clone.lock().unwrap();
                 let payloads = storage
                     .execute(&sql)
                     .await
