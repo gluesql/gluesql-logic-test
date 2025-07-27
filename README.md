@@ -17,6 +17,19 @@ cargo run --bin gluesql-logic-test -- --verbose test.slt
 
 _slt/_ directory may be from https://sqlite.org/sqllogictest/tree?name=test&type=tree.
 
+Useful workflow
+---------------
+
+To collect distinct error types when running sqllogictest, you can run the following commands:
+
+```
+$ cargo run --bin gluesql-logic-test -- slt/ 2>output
+$ python3 distinct.py output
+evaluate: unreachable empty aggregate value: Avg(UnaryOp { op: Plus, expr: Literal(Number(BigDecimal(sign=Plus, scale=0, digits=[86]))) })
+...
+```
+
+
 ---
 
 TODO items
