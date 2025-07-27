@@ -1,15 +1,4 @@
-use std::ops::ControlFlow;
-
-use gluesql::{
-    core::ast_builder::{table, Build},
-    prelude::{Glue, MemoryStorage, Payload},
-};
-use sqlparser::{
-    ast::{ObjectName, Visit, Visitor},
-    dialect::GenericDialect,
-    parser::Parser,
-    tokenizer::Tokenizer,
-};
+use gluesql::prelude::{Glue, MemoryStorage, Payload};
 
 use crate::{
     db::{Row, Type},
@@ -51,9 +40,8 @@ impl sqllogictest::DB for GlueSQL {
 
                 let output = match payload {
                     // select
-                    Payload::Select { rows, .. } => {
-                        let table_name = get_table_name(&sql);
-                        let types = get_table_types_sync(&mut *storage, &table_name).await?;
+                    Payload::Select { labels, rows } => {
+                        let types = infer_result_types(&labels, &rows);
                         let rows = rows
                             .into_iter()
                             .map(|row| row.into_iter().map(Into::into).collect())
@@ -62,8 +50,20 @@ impl sqllogictest::DB for GlueSQL {
                         sqllogictest::DBOutput::Rows { types, rows }
                     }
                     Payload::SelectMap(rows) => {
-                        let table_name = get_table_name(&sql);
-                        let types = get_table_types_sync(&mut *storage, &table_name).await?;
+                        // Convert SelectMap to the same format as Select for type inference
+                        let row_values: Vec<Vec<gluesql::prelude::Value>> = rows
+                            .iter()
+                            .map(|row| row.values().cloned().collect())
+                            .collect();
+
+                        // Get column labels from the first row's keys
+                        let labels: Vec<String> = if let Some(first_row) = rows.first() {
+                            first_row.keys().cloned().collect()
+                        } else {
+                            Vec::new()
+                        };
+
+                        let types = infer_result_types(&labels, &row_values);
                         let rows = rows
                             .into_iter()
                             .map(|row| row.into_values().map(Into::into).collect())
@@ -118,35 +118,6 @@ impl GlueSQL {
     }
 }
 
-async fn get_table_types_sync(
-    storage: &mut Glue<MemoryStorage>,
-    table_name: &str,
-) -> Result<Vec<Type>, Error> {
-    let payload = storage
-        .execute_stmt(&table(table_name).show_columns().build().unwrap())
-        .await
-        .map_err(Error::GlueSQL)?;
-
-    let Payload::ShowColumns(show_columns) = payload else {
-        unreachable!("SHOW COLUMNS should return Payload::ShowColumns")
-    };
-
-    Ok(show_columns
-        .into_iter()
-        .map(|(_, data_type)| {
-            let data_type = data_type.to_string();
-
-            match from_gluesql_type(&data_type) {
-                Some(t) => t,
-                None => {
-                    tracing::warn!("column type is not found: {:?}", data_type);
-                    Type::Any
-                }
-            }
-        })
-        .collect())
-}
-
 impl Execute for GlueSQL {
     fn execute_inner(&mut self, sql: impl AsRef<str>) -> Result<Output, LogicTestError> {
         use std::sync::{Arc, Mutex};
@@ -170,11 +141,8 @@ impl Execute for GlueSQL {
 
                 Ok::<Output, LogicTestError>(match payload {
                     // select
-                    Payload::Select { rows, .. } => {
-                        let table_name = get_table_name(&sql);
-                        let types = get_table_types_sync(&mut *storage, &table_name)
-                            .await
-                            .map_err(|e| LogicTestError::GlueSQL(e))?;
+                    Payload::Select { labels, rows } => {
+                        let types = infer_result_types(&labels, &rows);
 
                         Output::Rows {
                             types,
@@ -185,10 +153,20 @@ impl Execute for GlueSQL {
                         }
                     }
                     Payload::SelectMap(rows) => {
-                        let table_name = get_table_name(&sql);
-                        let types = get_table_types_sync(&mut *storage, &table_name)
-                            .await
-                            .map_err(|e| LogicTestError::GlueSQL(e))?;
+                        // Convert SelectMap to the same format as Select for type inference
+                        let row_values: Vec<Vec<gluesql::prelude::Value>> = rows
+                            .iter()
+                            .map(|row| row.values().cloned().collect())
+                            .collect();
+
+                        // Get column labels from the first row's keys
+                        let labels: Vec<String> = if let Some(first_row) = rows.first() {
+                            first_row.keys().cloned().collect()
+                        } else {
+                            Vec::new()
+                        };
+
+                        let types = infer_result_types(&labels, &row_values);
 
                         Output::Rows {
                             types,
@@ -231,37 +209,37 @@ impl Execute for GlueSQL {
     }
 }
 
-fn get_table_name(sql: &str) -> String {
-    let mut tokenizer = Tokenizer::new(&GenericDialect, sql);
-    let tokens = tokenizer.tokenize().unwrap();
-    let s = Parser::new(&GenericDialect)
-        .with_tokens(tokens)
-        .parse_statement()
-        .unwrap();
-
-    #[derive(Default)]
-    struct TableNameVisitor(Option<String>);
-
-    impl Visitor for TableNameVisitor {
-        type Break = ();
-
-        fn pre_visit_relation(&mut self, relation: &ObjectName) -> ControlFlow<Self::Break> {
-            self.0 = Some(relation.to_string());
-            ControlFlow::Break(())
-        }
-    }
-
-    let mut visitor = TableNameVisitor::default();
-    let _ = s.visit(&mut visitor);
-
-    visitor.0.unwrap()
-}
-
-fn from_gluesql_type(value: &str) -> Option<Type> {
-    Some(match value {
-        "INT" => Type::Integer,
-        _ => return Type::from_sql_type(value),
-    })
+fn infer_result_types(labels: &[String], rows: &[Vec<gluesql::prelude::Value>]) -> Vec<Type> {
+    (0..labels.len())
+        .map(|col_idx| {
+            // Infer type from non-null values in this column
+            for row in rows {
+                if let Some(value) = row.get(col_idx) {
+                    match value {
+                        gluesql::prelude::Value::I8(_)
+                        | gluesql::prelude::Value::I16(_)
+                        | gluesql::prelude::Value::I32(_)
+                        | gluesql::prelude::Value::I64(_)
+                        | gluesql::prelude::Value::I128(_)
+                        | gluesql::prelude::Value::U8(_)
+                        | gluesql::prelude::Value::U16(_)
+                        | gluesql::prelude::Value::U32(_)
+                        | gluesql::prelude::Value::U64(_)
+                        | gluesql::prelude::Value::U128(_)
+                        | gluesql::prelude::Value::Bool(_) => return Type::Integer,
+                        gluesql::prelude::Value::F32(_) | gluesql::prelude::Value::F64(_) => {
+                            return Type::FloatingPoint;
+                        }
+                        gluesql::prelude::Value::Str(_) => return Type::Text,
+                        gluesql::prelude::Value::Null => continue, // Skip nulls
+                        _ => return Type::Any,
+                    }
+                }
+            }
+            // If all values are null or no rows, default to Any
+            Type::Any
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -271,19 +249,87 @@ mod tests {
     use super::*;
 
     #[test]
-    fn get_table_name() {
-        let sql = "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT NOT NULL)";
-        let table_name = super::get_table_name(sql);
-        assert_eq!(table_name, "test");
-
-        let sql = "SELECT * FROM test";
-        let table_name = super::get_table_name(sql);
-        assert_eq!(table_name, "test");
-    }
-
-    #[test]
     fn execute() {
         let mut gluesql = GlueSQL::new_memory();
         execute_test(&mut gluesql);
+    }
+
+    #[test]
+    fn test_result_type_inference() {
+        use gluesql::prelude::Value;
+
+        // Test with different value types
+        let labels = vec![
+            "id".to_string(),
+            "name".to_string(),
+            "score".to_string(),
+            "active".to_string(),
+        ];
+        let rows = vec![
+            vec![
+                Value::I32(1),
+                Value::Str("Alice".to_string()),
+                Value::F64(95.5),
+                Value::Bool(true),
+            ],
+            vec![
+                Value::I32(2),
+                Value::Str("Bob".to_string()),
+                Value::F64(87.2),
+                Value::Bool(false),
+            ],
+        ];
+
+        let types = infer_result_types(&labels, &rows);
+
+        assert_eq!(types.len(), 4);
+        assert_eq!(types[0], Type::Integer); // id
+        assert_eq!(types[1], Type::Text); // name
+        assert_eq!(types[2], Type::FloatingPoint); // score
+        assert_eq!(types[3], Type::Integer); // active (bool maps to integer)
+    }
+
+    #[test]
+    fn test_result_type_inference_with_nulls() {
+        use gluesql::prelude::Value;
+
+        // Test with null values - should infer from non-null values
+        let labels = vec!["value".to_string()];
+        let rows = vec![
+            vec![Value::Null],
+            vec![Value::Str("test".to_string())],
+            vec![Value::Null],
+        ];
+
+        let types = infer_result_types(&labels, &rows);
+
+        assert_eq!(types.len(), 1);
+        assert_eq!(types[0], Type::Text); // Should infer Text from the non-null value
+    }
+
+    #[test]
+    fn test_result_type_inference_all_nulls() {
+        use gluesql::prelude::Value;
+
+        // Test with all null values - should default to Any
+        let labels = vec!["value".to_string()];
+        let rows = vec![vec![Value::Null], vec![Value::Null]];
+
+        let types = infer_result_types(&labels, &rows);
+
+        assert_eq!(types.len(), 1);
+        assert_eq!(types[0], Type::Any); // Should default to Any when all values are null
+    }
+
+    #[test]
+    fn test_result_type_inference_empty_result() {
+        // Test with empty result set - should default to Any
+        let labels = vec!["value".to_string()];
+        let rows: Vec<Vec<gluesql::prelude::Value>> = vec![];
+
+        let types = infer_result_types(&labels, &rows);
+
+        assert_eq!(types.len(), 1);
+        assert_eq!(types[0], Type::Any); // Should default to Any when no rows
     }
 }
