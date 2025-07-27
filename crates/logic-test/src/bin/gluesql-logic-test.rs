@@ -1,5 +1,6 @@
 use clap::Parser;
 use gluesql_logic_test::db::gluesql::GlueSQL;
+use regex::Regex;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -71,12 +72,22 @@ async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Er
 
     println!("Found {} test files", test_files.len());
 
+    let trailing_comments_escape_regex = Regex::new(r"(skipif|onlyif) ([^ ]+) #([^\n]+)\n")?;
+
     for test_file in test_files {
         println!("Running test: {}", test_file.display());
 
         let mut runner = sqllogictest::Runner::new(|| async { Ok(GlueSQL::new_memory()) });
 
-        match runner.run_file_async(&test_file).await {
+        // Escape trailing comments
+        let script = trailing_comments_escape_regex
+            .replace_all(&fs::read_to_string(&test_file)?, "$1 $2\n")
+            .to_string();
+
+        match runner
+            .run_script_with_name_async(&script, test_file.to_str().expect("Must exist."))
+            .await
+        {
             Ok(_) => println!("✓ {}", test_file.display()),
             Err(e) => {
                 eprintln!("✗ {} - Error: {}", test_file.display(), e);
