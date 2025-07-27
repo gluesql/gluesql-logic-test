@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 static TRAILING_COMMENTS_ESCAPE_REGEX: std::sync::LazyLock<regex::Regex> =
     std::sync::LazyLock::new(|| {
-        Regex::new(r"(skipif|onlyif) ([^ ]+) #([^\n]+)\n").expect("Invalid regex")
+        Regex::new(r"(skipif|onlyif)[ ]*([^ ]+)[ ]*#([^\n]+)\n").expect("Invalid regex")
     });
 
 async fn run_file_async<D: sqllogictest::AsyncDB, M: sqllogictest::MakeConnection<Conn = D>>(
