@@ -6,7 +6,7 @@ authors.workspace = true
 
 [dependencies]
 async-trait = "0.1"
-gluesql = { version = "0.17", git = "https://github.com/gluesql/gluesql.git", rev = "6cd4003b437dee3ffa70298a40016e742d1e9c79" }
+gluesql = { git = "https://github.com/gluesql/gluesql.git", rev = "a361d9a6c62bf085d99278ddc47490afec78f973" }
 # depend on gluesql-core
 chrono = "=0.4.41"
 clap = { version = "4.0", features = ["derive"] }

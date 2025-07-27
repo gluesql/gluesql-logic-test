@@ -1383,7 +1383,7 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 [[package]]
 name = "gluesql"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "gluesql-cli",
  "gluesql-composite-storage",
@@ -1405,7 +1405,7 @@ dependencies = [
 [[package]]
 name = "gluesql-cli"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "anyhow",
  "clap 3.2.23",
@@ -1429,7 +1429,7 @@ dependencies = [
 [[package]]
 name = "gluesql-composite-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "futures",
@@ -1440,7 +1440,7 @@ dependencies = [
 [[package]]
 name = "gluesql-core"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-recursion",
  "async-trait",
@@ -1470,7 +1470,7 @@ dependencies = [
 [[package]]
 name = "gluesql-csv-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "csv",
@@ -1485,7 +1485,7 @@ dependencies = [
 [[package]]
 name = "gluesql-file-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "futures",
@@ -1499,7 +1499,7 @@ dependencies = [
 [[package]]
 name = "gluesql-git-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "gluesql-core",
@@ -1512,7 +1512,7 @@ dependencies = [
 [[package]]
 name = "gluesql-json-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "futures",
@@ -1548,7 +1548,7 @@ dependencies = [
 [[package]]
 name = "gluesql-mongo-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "bson",
@@ -1567,7 +1567,7 @@ dependencies = [
 [[package]]
 name = "gluesql-parquet-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1587,7 +1587,7 @@ dependencies = [
 [[package]]
 name = "gluesql-redb-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -1603,7 +1603,7 @@ dependencies = [
 [[package]]
 name = "gluesql-redis-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1617,7 +1617,7 @@ dependencies = [
 [[package]]
 name = "gluesql-shared-memory-storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "futures",
@@ -1630,7 +1630,7 @@ dependencies = [
 [[package]]
 name = "gluesql-test-suite"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "bigdecimal",
@@ -1646,7 +1646,7 @@ dependencies = [
 [[package]]
 name = "gluesql-utils"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "futures",
  "indexmap 1.9.3",
@@ -1656,7 +1656,7 @@ dependencies = [
 [[package]]
 name = "gluesql_memory_storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-trait",
  "futures",
@@ -1667,7 +1667,7 @@ dependencies = [
 [[package]]
 name = "gluesql_sled_storage"
 version = "0.17.0"
-source = "git+https://github.com/gluesql/gluesql.git?rev=6cd4003b437dee3ffa70298a40016e742d1e9c79#6cd4003b437dee3ffa70298a40016e742d1e9c79"
+source = "git+https://github.com/gluesql/gluesql.git?rev=a361d9a6c62bf085d99278ddc47490afec78f973#a361d9a6c62bf085d99278ddc47490afec78f973"
 dependencies = [
  "async-io",
  "async-trait",
