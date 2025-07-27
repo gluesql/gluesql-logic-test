@@ -61,8 +61,24 @@ async fn run_file_async<D: sqllogictest::AsyncDB, M: sqllogictest::MakeConnectio
         .await
 }
 
+fn value_wise_sql_result_validator(
+    normalizer: sqllogictest::Normalizer,
+    actual: &[Vec<String>],
+    expected: &[String],
+) -> bool {
+    // NOTE: copied from sqllogictest-rs but flatten actual rows for compatibility with SQLite testsuite.
+    // https://github.com/risinglightdb/sqllogictest-rs/blob/dc6c6d4c666a8972e4398235ccfae688c202dd4b/sqllogictest/src/runner.rs#L528C1-L535
+    let expected_results: Vec<String> = expected.iter().map(normalizer).collect();
+    let normalized_rows: Vec<String> = actual
+        .iter()
+        .flat_map(|strs| strs.iter().map(normalizer))
+        .collect();
+    normalized_rows == expected_results
+}
+
 async fn run_single_test(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut runner = sqllogictest::Runner::new(|| async { Ok(GlueSQL::new_memory()) });
+    runner.with_validator(value_wise_sql_result_validator);
     run_file_async(&mut runner, path).await?;
 
     Ok(())
@@ -78,6 +94,7 @@ async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Er
 
     for test_file in test_files {
         let mut runner = sqllogictest::Runner::new(|| async { Ok(GlueSQL::new_memory()) });
+        runner.with_validator(value_wise_sql_result_validator);
         match run_file_async(&mut runner, &test_file).await {
             Ok(_) => println!("✓ {}", test_file.display()),
             Err(e) => {
