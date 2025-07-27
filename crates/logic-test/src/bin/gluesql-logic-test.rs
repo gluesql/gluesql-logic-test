@@ -93,7 +93,7 @@ async fn run_directory_tests(
     fail_fast: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut test_files = Vec::new();
-    collect_test_files(&dir, &mut test_files)?;
+    collect_test_files(dir, &mut test_files)?;
 
     test_files.sort();
 
