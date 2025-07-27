@@ -14,6 +14,10 @@ struct Args {
     /// Verbose output
     #[arg(short, long, help = "Enable verbose output")]
     verbose: bool,
+
+    /// Stop on first test failure
+    #[arg(long, help = "Stop on first test failure")]
+    fail_fast: bool,
 }
 
 #[tokio::main]
@@ -27,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.path.is_file() {
         run_single_test(&args.path).await?;
     } else if args.path.is_dir() {
-        run_directory_tests(&args.path).await?;
+        run_directory_tests(&args.path, args.fail_fast).await?;
     } else {
         eprintln!("Error: Path {} does not exist", args.path.display());
         std::process::exit(1);
@@ -84,7 +88,10 @@ async fn run_single_test(path: &PathBuf) -> Result<(), Box<dyn std::error::Error
     Ok(())
 }
 
-async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+async fn run_directory_tests(
+    dir: &PathBuf,
+    fail_fast: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut test_files = Vec::new();
     collect_test_files(&dir, &mut test_files)?;
 
@@ -99,7 +106,9 @@ async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Er
             Ok(_) => println!("✓ {}", test_file.display()),
             Err(e) => {
                 eprintln!("✗ {} - Error: {}", test_file.display(), e);
-                return Err(e.into());
+                if fail_fast {
+                    return Err(e.into());
+                }
             }
         }
     }
