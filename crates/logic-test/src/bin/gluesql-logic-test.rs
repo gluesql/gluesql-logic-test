@@ -69,26 +69,8 @@ async fn run_single_test(path: &PathBuf) -> Result<(), Box<dyn std::error::Error
 }
 
 async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    use std::fs;
-
-    let entries = fs::read_dir(dir)?;
     let mut test_files = Vec::new();
-
-    for entry in entries {
-        let entry = entry?;
-        let path = entry.path();
-
-        if path.is_file() {
-            if let Some(ext) = path.extension() {
-                if ext == "slt" || ext == "test" {
-                    test_files.push(path);
-                }
-            }
-        } else if path.is_dir() {
-            // Recursively find test files
-            collect_test_files(&path, &mut test_files)?;
-        }
-    }
+    collect_test_files(&dir, &mut test_files)?;
 
     test_files.sort();
 
