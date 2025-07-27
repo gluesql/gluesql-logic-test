@@ -37,11 +37,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn run_single_test(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+static TRAILING_COMMENTS_ESCAPE_REGEX: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| {
+        Regex::new(r"(skipif|onlyif) ([^ ]+) #([^\n]+)\n").expect("Invalid regex")
+    });
+
+async fn run_file_async<D: sqllogictest::AsyncDB, M: sqllogictest::MakeConnection<Conn = D>>(
+    runner: &mut sqllogictest::Runner<D, M>,
+    path: &PathBuf,
+) -> Result<(), sqllogictest::TestError> {
     println!("Running test: {}", path.display());
 
+    // Escape trailing comments
+    let script = TRAILING_COMMENTS_ESCAPE_REGEX
+        .replace_all(
+            &std::fs::read_to_string(&path).expect("Must exist"),
+            "$1 $2\n",
+        )
+        .to_string();
+
+    runner
+        .run_script_with_name_async(&script, path.to_str().expect("Must exist."))
+        .await
+}
+
+async fn run_single_test(path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut runner = sqllogictest::Runner::new(|| async { Ok(GlueSQL::new_memory()) });
-    runner.run_file_async(path).await?;
+    run_file_async(&mut runner, path).await?;
 
     Ok(())
 }
@@ -72,22 +94,9 @@ async fn run_directory_tests(dir: &PathBuf) -> Result<(), Box<dyn std::error::Er
 
     println!("Found {} test files", test_files.len());
 
-    let trailing_comments_escape_regex = Regex::new(r"(skipif|onlyif) ([^ ]+) #([^\n]+)\n")?;
-
     for test_file in test_files {
-        println!("Running test: {}", test_file.display());
-
         let mut runner = sqllogictest::Runner::new(|| async { Ok(GlueSQL::new_memory()) });
-
-        // Escape trailing comments
-        let script = trailing_comments_escape_regex
-            .replace_all(&fs::read_to_string(&test_file)?, "$1 $2\n")
-            .to_string();
-
-        match runner
-            .run_script_with_name_async(&script, test_file.to_str().expect("Must exist."))
-            .await
-        {
+        match run_file_async(&mut runner, &test_file).await {
             Ok(_) => println!("✓ {}", test_file.display()),
             Err(e) => {
                 eprintln!("✗ {} - Error: {}", test_file.display(), e);

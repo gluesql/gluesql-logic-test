@@ -54,26 +54,22 @@ impl sqllogictest::DB for GlueSQL {
                     Payload::Select { rows, .. } => {
                         let table_name = get_table_name(&sql);
                         let types = get_table_types_sync(&mut *storage, &table_name).await?;
+                        let rows = rows
+                            .into_iter()
+                            .map(|row| row.into_iter().map(Into::into).collect())
+                            .collect();
 
-                        sqllogictest::DBOutput::Rows {
-                            types,
-                            rows: rows
-                                .into_iter()
-                                .map(|row| row.into_iter().map(Into::into).collect())
-                                .collect(),
-                        }
+                        sqllogictest::DBOutput::Rows { types, rows }
                     }
                     Payload::SelectMap(rows) => {
                         let table_name = get_table_name(&sql);
                         let types = get_table_types_sync(&mut *storage, &table_name).await?;
+                        let rows = rows
+                            .into_iter()
+                            .map(|row| row.into_values().map(Into::into).collect())
+                            .collect();
 
-                        sqllogictest::DBOutput::Rows {
-                            types,
-                            rows: rows
-                                .into_iter()
-                                .map(|row| row.into_values().map(Into::into).collect())
-                                .collect(),
-                        }
+                        sqllogictest::DBOutput::Rows { types, rows }
                     }
                     // execute
                     Payload::Insert(_)
