@@ -1,0 +1,63 @@
+statement ok
+CREATE TABLE employees (
+    id INTEGER,
+    name TEXT,
+    department TEXT,
+    salary INTEGER
+)
+
+statement ok
+INSERT INTO employees VALUES (1, 'Alice', 'Engineering', 75000)
+
+statement ok
+INSERT INTO employees VALUES (2, 'Bob', 'Sales', 65000)
+
+statement ok
+INSERT INTO employees VALUES (3, 'Charlie', 'Engineering', 80000)
+
+statement ok
+INSERT INTO employees VALUES (4, 'Diana', 'Marketing', 70000)
+
+query ITII rowsort
+SELECT * FROM employees
+----
+1 Alice Engineering 75000
+2 Bob Sales 65000
+3 Charlie Engineering 80000
+4 Diana Marketing 70000
+
+query ITII rowsort
+SELECT name, department, salary, id FROM employees WHERE salary >= 70000
+----
+Alice Engineering 75000 1
+Charlie Engineering 80000 3
+Diana Marketing 70000 4
+
+query I
+SELECT COUNT(*) FROM employees
+----
+4
+
+query I
+SELECT MAX(salary) FROM employees
+----
+80000
+
+statement ok
+UPDATE employees SET salary = 85000 WHERE name = 'Charlie'
+
+query I
+SELECT salary FROM employees WHERE name = 'Charlie'
+----
+85000
+
+statement ok
+DELETE FROM employees WHERE department = 'Sales'
+
+query I
+SELECT COUNT(*) FROM employees
+----
+3
+
+statement ok
+DROP TABLE employees
