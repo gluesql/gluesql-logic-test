@@ -106,6 +106,37 @@ async fn run_directory_tests(
             Ok(_) => println!("✓ {}", test_file.display()),
             Err(e) => {
                 eprintln!("✗ {} - Error: {}", test_file.display(), e);
+                let sql = match e.kind() {
+                    sqllogictest::TestErrorKind::ParseError(..) => None,
+                    sqllogictest::TestErrorKind::Ok { sql, .. } => Some(sql),
+                    sqllogictest::TestErrorKind::Fail { sql, .. } => Some(sql),
+                    sqllogictest::TestErrorKind::SystemFail { .. } => None,
+                    sqllogictest::TestErrorKind::SystemStdoutMismatch { .. } => None,
+                    sqllogictest::TestErrorKind::ErrorMismatch { sql, .. } => Some(sql),
+                    sqllogictest::TestErrorKind::StatementResultMismatch { sql, .. } => Some(sql),
+                    sqllogictest::TestErrorKind::QueryResultMismatch { sql, .. } => Some(sql),
+                    sqllogictest::TestErrorKind::QueryResultColumnsMismatch { sql, .. } => {
+                        Some(sql)
+                    }
+                    _ => todo!(),
+                };
+                if let Some(sql) = sql {
+                    eprintln!(
+                        "You can almost reproduce this situation with the following SQL queries:"
+                    );
+                    let setup_sql = std::fs::read_to_string(&test_file)
+                        .unwrap()
+                        .lines()
+                        .filter(|line| {
+                            line.starts_with("CREATE TABLE") || line.starts_with("INSERT INTO")
+                        })
+                        .collect::<Vec<_>>()
+                        .join(";\n");
+                    eprintln!("{setup_sql};");
+                    eprintln!("{sql};");
+                    eprintln!();
+                }
+
                 if fail_fast {
                     return Err(e.into());
                 }
